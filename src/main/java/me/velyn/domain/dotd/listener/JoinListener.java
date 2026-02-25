@@ -58,7 +58,7 @@ public class JoinListener implements Listener {
         Optional<String> hostName = playerDomainCache.get(player);
 
         if (configManager.isDebugLog()) {
-            log.info(String.format("Received PlayerJoinEvent and read '%s' from LoginEvent Cache", hostName));
+            log.info(String.format("Received PlayerJoinEvent and read '%s' from LoginEvent Cache", hostName.orElse(null)));
         }
 
         if (hostName.isEmpty()) {
