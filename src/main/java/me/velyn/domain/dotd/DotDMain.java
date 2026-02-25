@@ -22,7 +22,7 @@ public class DotDMain extends JavaPlugin {
 
         saveDefaultConfig();
 
-        configManager = new ConfigManager(log);
+        configManager = new ConfigManager(log, this);
         configManager.applyConfigValues(getConfig());
         log.info("Config has been parsed");
 

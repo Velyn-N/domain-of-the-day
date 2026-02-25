@@ -12,13 +12,15 @@ public class ConfigManager {
     public static final String DEBUG_LOG_PROP = "debug-log";
 
     private final Logger log;
+    private final DotDMain main;
 
     private boolean isDebugLog = false;
 
     private final Map<String, List<DomainAction>> domainActions;
 
-    public ConfigManager(Logger logger) {
+    public ConfigManager(Logger logger, DotDMain main) {
         this.log = logger;
+        this.main = main;
         domainActions = new HashMap<>();
     }
 
@@ -50,7 +52,7 @@ public class ConfigManager {
             log.info(String.format("Config Block %s appears to be empty", blockKey));
             return;
         }
-        List<DomainAction> actions = DomainAction.parseConfig(confBlock);
+        List<DomainAction> actions = DomainAction.parseConfig(confBlock, main, log);
         if (actions.isEmpty()) {
             log.info(String.format("Config Block %s appears to contain no valid Actions!", blockKey));
             return;

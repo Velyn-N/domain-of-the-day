@@ -17,6 +17,8 @@ default:
     # Delay for the Text to be sent in seconds. Optional value.
     # 0 or smaller sends the Message immediately
     delay: 2
+  # The icon property can override the default server icon on a per-domain basis
+  #  icon: "images/icon.png"
 
 # Block for Custom Configurations
 custom:
