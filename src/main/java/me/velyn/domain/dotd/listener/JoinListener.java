@@ -4,6 +4,7 @@ import me.velyn.domain.dotd.ConfigManager;
 import me.velyn.domain.dotd.PlayerDomainCache;
 import me.velyn.domain.dotd.Scheduler;
 import me.velyn.domain.dotd.actions.JoinMessageAction;
+import me.velyn.domain.dotd.actions.PreventJoinAction;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -48,6 +49,17 @@ public class JoinListener implements Listener {
         if (configManager.isDebugLog()) {
             log.info(String.format("Sanitized HostName is '%s'", hostName));
         }
+
+        Optional<PreventJoinAction> preventJoinAction = configManager.getDomainAction(hostName, PreventJoinAction.class);
+        if (preventJoinAction.isPresent()) {
+            PreventJoinAction action = preventJoinAction.get();
+            if (action.isEnabled()) {
+                log.info(String.format("Player '%s' tried to join with HostName '%s' but is not allowed!", player.getName(), hostName));
+                event.disallow(PlayerLoginEvent.Result.KICK_OTHER, action.getMessage());
+                return;
+            }
+        }
+
         playerDomainCache.add(player, hostName);
     }
 
