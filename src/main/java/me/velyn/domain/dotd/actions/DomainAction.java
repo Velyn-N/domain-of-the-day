@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 import me.velyn.domain.dotd.*;
 
-public sealed interface DomainAction permits PreventJoinAction, JoinMessageAction, MotdAction, ServerIconAction {
+public sealed interface DomainAction permits PreventJoinAction, JoinMessageAction, MotdAction, ServerIconAction, ServerListPlayersAction {
 
     Optional<DomainAction> readFromConfig(ConfigurationSection config);
 
@@ -22,7 +22,8 @@ public sealed interface DomainAction permits PreventJoinAction, JoinMessageActio
                 new MotdAction(),
                 new JoinMessageAction(),
                 new ServerIconAction(),
-                new PreventJoinAction()
+                new PreventJoinAction(),
+                new ServerListPlayersAction()
                ).map(impl -> impl.readFromConfig(config, main, log))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
