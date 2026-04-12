@@ -6,7 +6,6 @@ debug-log: false
 # This is the Domain the underlying values are used for.
 # The "default" Domain contains fallback values for players that do not use a specified Domain
 default:
-  # The "Message of the Day" (Text shown in the Server List).
   # Supports MiniMessage Format: https://docs.advntr.dev/minimessage/format.html
   motd: "<gray>A Minecraft Server"
   # A Message send to the Players Chat after they join
@@ -23,18 +22,44 @@ default:
 # Block for Custom Configurations
 custom:
   # Copy this block to add configs for different subdomains.
-  # Do not forget to count the numbers up!
+  # You can also reference the GitHub Repository for more information.
   1:
-    domains:
-      - localhost
-      - my-pc.local
-    motd: "<blue>Your local Minecraft Server<newline><rainbow>Just for you"
-    joinmessage:
-      text: "<green>Hello there!"
-  2:
+    # The Domains that will be affected by this Block
     domains:
       - example.com
-    motd: "<blue>An example Minecraft Server"
+      - sub.example.com
+    # The "Message of the Day" (Text shown in the Server List).
+    # Supports MiniMessage Format: https://docs.advntr.dev/minimessage/format.html
+    motd: "<gray>A Minecraft Server"
+
+    # A Message send to the Player's Chat after they join
     joinmessage:
-      text: "<white><Server> Greetings!"
-      delay: 3
+      # The text that will be sent to the Player.
+      # Supports MiniMessage Format: https://docs.advntr.dev/minimessage/format.html
+      text: "<yellow>Welcome back!"
+      # Delay for the Text to be sent in seconds.
+      # 0 or smaller sends the Message immediately
+      delay: 2
+
+    # References an Image placed inside this plugins Data folder under "images/server-icon.png"
+    icon: "images/server-icon.png"
+
+    # Enabling this prevents Players from joining your server from this domain
+    preventjoin:
+      enabled: false
+      # The text that will be displayed to rejected players
+      # Supports MiniMessage Format: https://docs.advntr.dev/minimessage/format.html
+      message: "<red>You are not allowed to join this server!"
+
+    # Modifies the Player preview in the Serverlist
+    serverlist-players:
+      # If this is enabled no Player preview will be shown
+      should-hide: false
+      # Simulates fake Players on your server so you can write funny texts
+      fake-players:
+        - "Welcome to this"
+        - "Minecraft Server"
+      # Modifies the Online Player count in the Serverlist
+      online-players: 2
+      # Modifies the Maximum Player count in the Serverlist
+      max-players: 99
