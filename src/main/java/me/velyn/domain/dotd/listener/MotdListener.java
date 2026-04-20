@@ -26,48 +26,42 @@ public class MotdListener implements Listener {
 
     @EventHandler
     public void onLegacyMOTDRequest(ServerListPingEvent event) {
-        String hostName = null;
-        PaperServerListPingEvent paperEvent = null;
-        if ("com.destroystokyo.paper.network.StandardPaperServerListPingEventImpl"
-                .equals(event.getClass().getCanonicalName())) {
-            try {
-                Object status = event.getClass().getMethod("getClient").invoke(event);
-                InetSocketAddress virtualHost = (InetSocketAddress) status.getClass().getMethod("getVirtualHost")
-                        .invoke(status);
-                hostName = virtualHost.getHostString();
-            } catch (Exception e) {
-                if (configManager.isDebugLog()) {
-                    log.warning(String.format("Error while using Paper Workaround: %s", e));
-                }
-            }
-            try {
-                paperEvent = (PaperServerListPingEvent) event;
-            } catch (Exception e) {
-                if (configManager.isDebugLog()) {
-                    log.warning(String.format("Event is not a PaperServerListPingEvent: %s", e));
-                }
-            }
-        }
-        if (hostName == null) {
-            if (configManager.isDebugLog()) {
-                log.warning("Paper Workaround for reading MOTD Ping Hostnames did not work, falling back to API Method...");
-            }
-            hostName = event.getHostname();
-        }
-
+        String hostName = resolveHostName(event);
         defaultHandling(event, hostName);
 
-        final PaperServerListPingEvent finPaperEvent = paperEvent;
+        if (event instanceof PaperServerListPingEvent paperEvent) {
+            configManager.getDomainAction(hostName, ServerListPlayersAction.class)
+                    .ifPresent(slpAction -> handlePlayerAction(slpAction, paperEvent));
+        } else if (configManager.isDebugLog()) {
+            configManager.getDomainAction(hostName, ServerListPlayersAction.class)
+                    .ifPresent(slpAction -> log.info(String.format("Not a Paper Event, cannot handle ServerListPlayersAction: %s", slpAction.getClass().getName())));
+        }
+    }
+
+    @EventHandler
+    public void handlePaper(PaperServerListPingEvent event) {
+        String hostName = resolveHostName(event);
+        defaultHandling(event, hostName);
         configManager.getDomainAction(hostName, ServerListPlayersAction.class)
-                .ifPresent(slpAction -> {
-                    if (finPaperEvent == null) {
-                        if (configManager.isDebugLog()) {
-                            log.info(String.format("Not a Paper Event, cannot handle ServerListPlayersAction: %s", slpAction.getClass().getName()));
-                        }
-                    } else {
-                        handlePlayerAction(slpAction, finPaperEvent);
-                    }
-                });
+                .ifPresent(slpAction -> handlePlayerAction(slpAction, event));
+    }
+
+    private String resolveHostName(ServerListPingEvent event) {
+        String hostName = event.getHostname();
+        if (hostName.isEmpty() && event instanceof PaperServerListPingEvent paperEvent) {
+            if (configManager.isDebugLog()) {
+                log.warning("getHostname() returned empty, falling back to getClient().getVirtualHost()");
+            }
+            try {
+                InetSocketAddress virtualHost = paperEvent.getClient().getVirtualHost();
+                hostName = virtualHost == null ? null : virtualHost.getHostString();
+            } catch (Exception e) {
+                if (configManager.isDebugLog()) {
+                    log.warning(String.format("Failed to resolve virtual host from Paper event: %s", e));
+                }
+            }
+        }
+        return hostName;
     }
 
     private void defaultHandling(ServerListPingEvent event, String hostName) {
@@ -78,15 +72,6 @@ public class MotdListener implements Listener {
                      .ifPresent(motdAction -> event.motd(motdAction.getMotd()));
         configManager.getDomainAction(hostName, ServerIconAction.class)
                 .ifPresent(iconAction -> event.setServerIcon(iconAction.getIcon()));
-    }
-
-    @EventHandler
-    public void handlePaper(PaperServerListPingEvent event) {
-        String hostName = event.getHostname();
-
-        defaultHandling(event, hostName);
-        configManager.getDomainAction(hostName, ServerListPlayersAction.class)
-                .ifPresent(slpAction -> handlePlayerAction(slpAction, event));
     }
 
     private void handlePlayerAction(ServerListPlayersAction action, PaperServerListPingEvent event) {
