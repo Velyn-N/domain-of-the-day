@@ -71,7 +71,11 @@ public class ConfigManager {
     }
 
     public List<DomainAction> getDomainActions(String domain) {
-        return domainActions.getOrDefault(domain.toLowerCase(), domainActions.getOrDefault(DEFAULT_DOMAIN, new ArrayList<>()));
+        List<DomainAction> defaultActions = domainActions.getOrDefault(DEFAULT_DOMAIN, new ArrayList<>());
+        if (domain == null || domain.isEmpty()) {
+            return defaultActions;
+        }
+        return domainActions.getOrDefault(domain.toLowerCase(Locale.ROOT), defaultActions);
     }
 
     public <T> Optional<T> getDomainAction(String domain, Class<T> type) {

@@ -48,13 +48,18 @@ public class MotdListener implements Listener {
 
     private String resolveHostName(ServerListPingEvent event) {
         String hostName = event.getHostname();
+        if (hostName == null) {
+            hostName = "";
+        }
         if (hostName.isEmpty() && event instanceof PaperServerListPingEvent paperEvent) {
             if (configManager.isDebugLog()) {
                 log.warning("getHostname() returned empty, falling back to getClient().getVirtualHost()");
             }
             try {
                 InetSocketAddress virtualHost = paperEvent.getClient().getVirtualHost();
-                hostName = virtualHost == null ? null : virtualHost.getHostString();
+                if (virtualHost != null && virtualHost.getHostString() != null) {
+                    hostName = virtualHost.getHostString();
+                }
             } catch (Exception e) {
                 if (configManager.isDebugLog()) {
                     log.warning(String.format("Failed to resolve virtual host from Paper event: %s", e));
